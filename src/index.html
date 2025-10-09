@@ -1,14 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <link href="./output.css" rel="stylesheet">
-    <title>Document</title>
+    <title>Pokedex</title>
 </head>
-<body>
-     <h1 class="text-3xl font-bold underline bg-blue-300">
-jiji
-  </h1>
+<body class="flex justify-center bg-[url('../images/pokebackground.png')] bg-cover">
+  <section id="buscador"></section>
+
+  <section id="llista" class="flex flex-row w-300 h-screen bg-amber-50">
+    <!-- <div class="contenedor w-80 h-80 rounded-xl bg-orange-500 text-white flex justify-center items-center flex-col gap-5 font-bold">
+      <h2>Pikachu</h2>
+      <div class="w-50 h-50 bg-red-300"><img class = "h-50 justify-self-center" src="http://icon-library.com/images/pikachu-png-icon/pikachu-png-icon-8.jpg" alt=""></div>
+      <p class="pokedexnumber w-[80%] flex justify-end">#25</p>
+    </div> -->
+    
+    <div class="contenidor w-80 h-80 bg-green-800 flex flex-col">
+      <div class="fotocontenidor w-[20%] h-[20%] m-4 bg-amber-200 flex justify-center items-center self-center">
+        <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/001.png" alt="">
+      </div>
+      <div class="texto p-4">
+        <p id="pokedexnumber">N 0001</p>
+        <h2 id="pokename">Bulbasaur</h2>
+      </div>
+      <div id="elementos">
+        <div class="elemento1"></div>
+        <div class="elemento2"></div>
+      </div>
+
+    </div>
+  </section>
 </body>
 </html>
