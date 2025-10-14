@@ -28,8 +28,7 @@ async function searchPokemon(pokemon_name) {
             pokemonName.textContent = capitalizeFirstLetter(thisPokemon.name);
             pokemonHeight.textContent = thisPokemon.height;
             pokemonWeight.textContent = thisPokemon.weight;
-            pokemonTypes.textContent = capitalizeFirstLetter(thisPokemon.types[0].type.name) + '' + (thisPokemon.types[1].type.name ? ' - ' + capitalizeFirstLetter(thisPokemon.types[1].type.name) : '');
-            // + '' +(thisPokemon.types[1] ?  ' - ' + thisPokemon.types[1].type : '')
+            pokemonTypes.textContent = thisPokemon.types.map((t) => capitalizeFirstLetter(t.type.name)).join(' - ');
         }
     }
     catch (error) {

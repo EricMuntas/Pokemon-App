@@ -41,10 +41,8 @@ async function searchPokemon(pokemon_name: string): Promise<void> {
             pokemonId.textContent = thisPokemon.id;
             pokemonName.textContent = capitalizeFirstLetter(thisPokemon.name);
             pokemonHeight.textContent = thisPokemon.height;
-            pokemonWeight.textContent =thisPokemon.weight;
-            pokemonTypes.textContent = capitalizeFirstLetter(thisPokemon.types[0].type.name) + '' +(thisPokemon.types[1].type.name ?  ' - ' + capitalizeFirstLetter(thisPokemon.types[1].type.name) : '');
-// + '' +(thisPokemon.types[1] ?  ' - ' + thisPokemon.types[1].type : '')
-
+            pokemonWeight.textContent = thisPokemon.weight;
+            pokemonTypes.textContent = thisPokemon.types.map((t: any) => capitalizeFirstLetter(t.type.name)).join(' - ');
         }
 
     } catch (error) {
