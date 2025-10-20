@@ -1,9 +1,18 @@
 @import "tailwindcss";
 
 button {
-    @apply cursor-pointer bg-blue-500 text-white w-fit px-4 py-0.5 border-2 rounded-xl flex justify-center items-center gap-2;
+    @apply cursor-pointer bg-blue-500 text-white w-fit px-4 py-0.5 border-2 rounded-xl flex justify-center items-center gap-2 border-black/10;
+}
+/* 
+.active-type {
+    @apply border-2 border-blue-800 opacity-60;
+} */
+
+.unactive-type {
+    @apply opacity-20;
 }
 
-.active-type {
-    @apply border-1 border-blue-800 opacity-60;
+.type-btn {
+    @apply w-30;
 }
+

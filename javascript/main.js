@@ -1,6 +1,9 @@
 var inputPokemonName;
 var searchBtn;
 var filterBtn;
+var deleteFilterBtn;
+var randomBtn;
+// Tipos btn
 var steelTypeBtn;
 var waterTypeBtn;
 var bugTypeBtn;
@@ -26,13 +29,16 @@ function onLoad() {
     inputPokemonName = document.getElementById('input-pokemon-name');
     searchBtn = document.getElementById('search-btn');
     filterBtn = document.getElementById('filter-btn');
+    deleteFilterBtn = document.getElementById('delete-btn');
+    randomBtn = document.getElementById('random-btn');
     searchBtn?.addEventListener('click', () => {
         let pokemonSearchName = inputPokemonName?.value;
-        if (pokemonSearchName) {
+        if (pokemonSearchName || pokemonSearchName == '') {
             searchPokemon(pokemonSearchName);
         }
     });
     filterBtn?.addEventListener('click', openFilterMenu);
+    randomBtn?.addEventListener('click', getRandomPokemon);
     steelTypeBtn = document.getElementById('steel');
     waterTypeBtn = document.getElementById('water');
     bugTypeBtn = document.getElementById('bug');
@@ -51,6 +57,42 @@ function onLoad() {
     groundTypeBtn = document.getElementById('ground');
     poisonTypeBtn = document.getElementById('poison');
     flyingTypeBtn = document.getElementById('flying');
+    let allTypesBtn = document.querySelectorAll('.type-btn');
+    deleteFilterBtn?.addEventListener('click', () => {
+        deleteFilterOptions(allTypesBtn);
+    });
+    allTypesBtn.forEach(typeBtn => {
+        typeBtn.addEventListener('click', () => {
+            let getType = typeBtn.id;
+            if (typeBtn.classList.contains('active-type')) {
+                const index = filteringTypes.indexOf(getType);
+                if (index > -1) {
+                    filteringTypes.splice(index, 1);
+                }
+                console.log(filteringTypes);
+                typeBtn.classList.remove('active-type');
+                typeBtn.classList.add('unactive-type');
+            }
+            else {
+                typeBtn.classList.add('active-type');
+                typeBtn.classList.remove('unactive-type');
+                filteringTypes.push(getType);
+                allTypesBtn.forEach(element => {
+                    if (!element.classList.contains('active-type')) {
+                        element.classList.add('unactive-type');
+                    }
+                });
+                searchPokemonByType(getType);
+            }
+        });
+    });
+}
+function deleteFilterOptions(allTypesBtn) {
+    filteringTypes = [];
+    allTypesBtn.forEach(typeBtn => {
+        typeBtn.classList.remove('unactive-type');
+        typeBtn.classList.remove('active-type');
+    });
 }
 function openFilterMenu() {
     let filterMenu = document.getElementById('filter-menu');
@@ -62,21 +104,9 @@ function openFilterMenu() {
         filterMenu?.classList.add('hidden');
         filterBtn?.classList.remove('flex');
     }
-    let allTypesBtn = document.querySelectorAll('.type-btn');
-    allTypesBtn.forEach(typeBtn => {
-        typeBtn.addEventListener('click', () => {
-            let getType = typeBtn.id;
-            if (getType == 'delete') {
-                filteringTypes = [];
-            }
-            else {
-                typeBtn.classList.add('active-type');
-                filteringTypes.push(getType);
-            }
-        });
-    });
 }
 async function searchPokemon(pokemon_name) {
+    console.log(pokemon_name);
     const url = `https://pokeapi.co/api/v2/pokemon/${pokemon_name}`;
     try {
         const response = await fetch(url);
@@ -84,7 +114,20 @@ async function searchPokemon(pokemon_name) {
             throw new Error(`Response status: ${response.status}`);
         }
         const result = await response.json();
-        console.log(result);
+        window.location.href = `pokemon.html?name=${pokemon_name}`;
+    }
+    catch (error) {
+    }
+}
+async function searchPokemonByType(pokemon_type) {
+    const url = `https://pokeapi.co/api/v2/type/${pokemon_type}`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log(result.pokemon);
     }
     catch (error) {
     }
@@ -102,6 +145,23 @@ async function getAllPokemonPaginated() {
     }
     catch (error) {
     }
+}
+async function getRandomPokemon() {
+    let randomPokemonId = Math.floor(Math.random() * (1302 - 1) + 1);
+    const url = `https://pokeapi.co/api/v2/pokemon/${randomPokemonId}`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log(result);
+    }
+    catch (error) {
+    }
+}
+function capitalizeFirstLetter(val) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
 export {};
 //# sourceMappingURL=main.js.map
