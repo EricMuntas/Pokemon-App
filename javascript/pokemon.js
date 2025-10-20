@@ -23,7 +23,7 @@ async function searchPokemon(pokemon_name) {
         let pokemonTypes = document.getElementById('pokemon-types');
         let pokemonImg = document.getElementById('pokemon-img');
         if (pokemonId && pokemonName && pokemonHeight && pokemonWeight && pokemonTypes && pokemonImg) {
-            pokemonImg.src = thisPokemon.sprites.front_default;
+            pokemonImg.src = thisPokemon.sprites.other['official-artwork'].front_default;
             pokemonId.textContent = thisPokemon.id;
             pokemonName.textContent = capitalizeFirstLetter(thisPokemon.name);
             pokemonHeight.textContent = thisPokemon.height;

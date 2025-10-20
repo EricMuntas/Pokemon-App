@@ -82,7 +82,6 @@ function onLoad(): void {
     poisonTypeBtn = document.getElementById('poison');
     flyingTypeBtn = document.getElementById('flying');
 
-
     let allTypesBtn: NodeListOf<HTMLElement> = document.querySelectorAll('.type-btn');
 
     deleteFilterBtn?.addEventListener('click', () => {
@@ -110,20 +109,27 @@ function onLoad(): void {
                 typeBtn.classList.remove('active-type');
                 typeBtn.classList.add('unactive-type');
 
-            }
-            else  {
+                if (filteringTypes.length == 0) {
+                    getAllPokemonPaginated();
+                }
 
-                typeBtn.classList.add('active-type');
-                typeBtn.classList.remove('unactive-type');
+            }
+            else {
+
+                filteringTypes = [];
                 filteringTypes.push(getType);
 
                 allTypesBtn.forEach(element => {
-                    if (!element.classList.contains('active-type')) {
+        
                         element.classList.add('unactive-type');
-                    }
+                
                 })
 
+                typeBtn.classList.add('active-type');
+                typeBtn.classList.remove('unactive-type');
+
                 searchPokemonByType(getType);
+
             }
 
         })
@@ -156,7 +162,7 @@ function openFilterMenu(): void {
 }
 
 async function searchPokemon(pokemon_name: string): Promise<void> {
-console.log(pokemon_name)
+    console.log(pokemon_name)
     const url = `https://pokeapi.co/api/v2/pokemon/${pokemon_name}`;
     try {
         const response = await fetch(url);
@@ -165,7 +171,7 @@ console.log(pokemon_name)
         }
 
         const result = await response.json();
-        window.location.href =`pokemon.html?name=${pokemon_name}`;
+        window.location.href = `pokemon.html?name=${pokemon_name}`;
 
     } catch (error) {
     }
@@ -180,7 +186,8 @@ async function searchPokemonByType(pokemon_type: string): Promise<void> {
         }
 
         const result = await response.json();
-        console.log(result.pokemon);
+        printPokemon(result.pokemon);
+        console.log(result.pokemon)
     } catch (error) {
     }
 }
@@ -197,16 +204,17 @@ async function getAllPokemonPaginated(): Promise<void> {
 
         const result = await response.json();
         console.log(result);
+        printPokemon(result);
     } catch (error) {
     }
 }
 
 
 async function getRandomPokemon(): Promise<void> {
-    
-   let randomPokemonId: number = Math.floor(Math.random() * (1302 - 1) + 1);
 
-     const url = `https://pokeapi.co/api/v2/pokemon/${randomPokemonId}`;
+    let randomPokemonId: number = Math.floor(Math.random() * (1302 - 1) + 1);
+
+    const url = `https://pokeapi.co/api/v2/pokemon/${randomPokemonId}`;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -215,6 +223,8 @@ async function getRandomPokemon(): Promise<void> {
 
         const result = await response.json();
         console.log(result);
+
+        window.location.href = `pokemon.html?name=${result.name}`;
     } catch (error) {
     }
 
@@ -222,4 +232,85 @@ async function getRandomPokemon(): Promise<void> {
 
 function capitalizeFirstLetter(val: string): string {
     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+
+async function printPokemon(pokemonData: any): Promise<void> {
+
+    document.body.style.cursor = 'wait';
+
+    let allTypesBtn: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.type-btn');
+
+    allTypesBtn.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    let pokemonContainer: HTMLElement | null = document.getElementById('listaPokemon');
+
+    if (!pokemonContainer) return;
+
+    pokemonContainer.innerHTML = '';
+
+    // Determinar si viene de getAllPokemon o searchPokemonByType
+    let pokemonList: any[];
+
+    if (pokemonData.results) {
+        // Viene de getAllPokemonPaginated
+        pokemonList = pokemonData.results;
+    } else if (Array.isArray(pokemonData)) {
+        // Viene de searchPokemonByType
+        pokemonList = pokemonData.map((item: any) => item.pokemon);
+    } else {
+        return;
+    }
+
+    // Usar for...of en lugar de forEach
+    for (const pokemon of pokemonList) {
+        try {
+            const response = await fetch(pokemon.url);
+            const pokemonDetail = await response.json();
+
+            const pokemonId = pokemonDetail.id.toString().padStart(3, '0');
+            const types = pokemonDetail.types.map((type: any) =>
+                `<p class="${type.type.name} tipo">${type.type.name.toUpperCase()}</p>`
+            ).join('');
+            const height = (pokemonDetail.height / 10).toFixed(1);
+            const weight = (pokemonDetail.weight / 10).toFixed(1);
+
+            const div = `
+                <div class="pokemon">
+                <a href="/src/pokemon.html?name=${pokemonDetail.name}">
+                    <p class="pokemon-id-back">#${pokemonId}</p>
+                    <div class="pokemon-imagen">
+                        <img src="${pokemonDetail.sprites.other['official-artwork'].front_default}" 
+                             alt="${capitalizeFirstLetter(pokemonDetail.name)}">
+                    </div>
+                    <div class="pokemon-info">
+                        <div class="nombre-contenedor">
+                            <p class="pokemon-id">#${pokemonId}</p>
+                            <h2 class="pokemon-nombre">${capitalizeFirstLetter(pokemonDetail.name)}</h2>
+                        </div>
+                        <div class="pokemon-tipos">
+                            ${types}
+                        </div>
+                        <div class="pokemon-stats">
+                            <p class="stat">${height}m</p>
+                            <p class="stat">${weight}kg</p>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+            `;
+
+            pokemonContainer.innerHTML += div;
+
+        } catch (error) {
+            console.error(`Error al cargar pokemon ${pokemon.name}:`, error);
+        }
+    }
+
+    document.body.style.cursor = 'auto';
+
+    allTypesBtn.forEach(btn => {
+        btn.disabled = false;
+    });
 }

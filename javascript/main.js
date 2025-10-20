@@ -72,16 +72,18 @@ function onLoad() {
                 console.log(filteringTypes);
                 typeBtn.classList.remove('active-type');
                 typeBtn.classList.add('unactive-type');
+                if (filteringTypes.length == 0) {
+                    getAllPokemonPaginated();
+                }
             }
             else {
-                typeBtn.classList.add('active-type');
-                typeBtn.classList.remove('unactive-type');
+                filteringTypes = [];
                 filteringTypes.push(getType);
                 allTypesBtn.forEach(element => {
-                    if (!element.classList.contains('active-type')) {
-                        element.classList.add('unactive-type');
-                    }
+                    element.classList.add('unactive-type');
                 });
+                typeBtn.classList.add('active-type');
+                typeBtn.classList.remove('unactive-type');
                 searchPokemonByType(getType);
             }
         });
@@ -127,6 +129,7 @@ async function searchPokemonByType(pokemon_type) {
             throw new Error(`Response status: ${response.status}`);
         }
         const result = await response.json();
+        printPokemon(result.pokemon);
         console.log(result.pokemon);
     }
     catch (error) {
@@ -142,6 +145,7 @@ async function getAllPokemonPaginated() {
         }
         const result = await response.json();
         console.log(result);
+        printPokemon(result);
     }
     catch (error) {
     }
@@ -156,12 +160,80 @@ async function getRandomPokemon() {
         }
         const result = await response.json();
         console.log(result);
+        window.location.href = `pokemon.html?name=${result.name}`;
     }
     catch (error) {
     }
 }
 function capitalizeFirstLetter(val) {
     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+async function printPokemon(pokemonData) {
+    document.body.style.cursor = 'wait';
+    let allTypesBtn = document.querySelectorAll('.type-btn');
+    allTypesBtn.forEach(btn => {
+        btn.disabled = true;
+    });
+    let pokemonContainer = document.getElementById('listaPokemon');
+    if (!pokemonContainer)
+        return;
+    pokemonContainer.innerHTML = '';
+    // Determinar si viene de getAllPokemon o searchPokemonByType
+    let pokemonList;
+    if (pokemonData.results) {
+        // Viene de getAllPokemonPaginated
+        pokemonList = pokemonData.results;
+    }
+    else if (Array.isArray(pokemonData)) {
+        // Viene de searchPokemonByType
+        pokemonList = pokemonData.map((item) => item.pokemon);
+    }
+    else {
+        return;
+    }
+    // Usar for...of en lugar de forEach
+    for (const pokemon of pokemonList) {
+        try {
+            const response = await fetch(pokemon.url);
+            const pokemonDetail = await response.json();
+            const pokemonId = pokemonDetail.id.toString().padStart(3, '0');
+            const types = pokemonDetail.types.map((type) => `<p class="${type.type.name} tipo">${type.type.name.toUpperCase()}</p>`).join('');
+            const height = (pokemonDetail.height / 10).toFixed(1);
+            const weight = (pokemonDetail.weight / 10).toFixed(1);
+            const div = `
+                <div class="pokemon">
+                <a href="/src/pokemon.html?name=${pokemonDetail.name}">
+                    <p class="pokemon-id-back">#${pokemonId}</p>
+                    <div class="pokemon-imagen">
+                        <img src="${pokemonDetail.sprites.other['official-artwork'].front_default}" 
+                             alt="${capitalizeFirstLetter(pokemonDetail.name)}">
+                    </div>
+                    <div class="pokemon-info">
+                        <div class="nombre-contenedor">
+                            <p class="pokemon-id">#${pokemonId}</p>
+                            <h2 class="pokemon-nombre">${capitalizeFirstLetter(pokemonDetail.name)}</h2>
+                        </div>
+                        <div class="pokemon-tipos">
+                            ${types}
+                        </div>
+                        <div class="pokemon-stats">
+                            <p class="stat">${height}m</p>
+                            <p class="stat">${weight}kg</p>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+            `;
+            pokemonContainer.innerHTML += div;
+        }
+        catch (error) {
+            console.error(`Error al cargar pokemon ${pokemon.name}:`, error);
+        }
+    }
+    document.body.style.cursor = 'auto';
+    allTypesBtn.forEach(btn => {
+        btn.disabled = false;
+    });
 }
 export {};
 //# sourceMappingURL=main.js.map
