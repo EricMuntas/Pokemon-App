@@ -22,7 +22,13 @@ var darkTypeBtn;
 var groundTypeBtn;
 var poisonTypeBtn;
 var flyingTypeBtn;
+var previousPageBtn;
+var nextPageBtn;
 var filteringTypes = [];
+var paginaActualSpan;
+var totalPaginasSpan;
+var paginaActualCount = 1;
+var totalPaginasCount = 1040 / 20;
 document.addEventListener('DOMContentLoaded', onLoad);
 function onLoad() {
     getAllPokemonPaginated();
@@ -31,6 +37,16 @@ function onLoad() {
     filterBtn = document.getElementById('filter-btn');
     deleteFilterBtn = document.getElementById('delete-btn');
     randomBtn = document.getElementById('random-btn');
+    previousPageBtn = document.getElementById('previous');
+    nextPageBtn = document.getElementById('next');
+    previousPageBtn?.addEventListener('click', previousPage);
+    nextPageBtn?.addEventListener('click', nextPage);
+    paginaActualSpan = document.getElementById('paginaActual');
+    totalPaginasSpan = document.getElementById('totalPaginas');
+    if (paginaActualSpan && totalPaginasSpan) {
+        paginaActualSpan.innerHTML = '' + paginaActualCount;
+        totalPaginasSpan.innerHTML = '' + totalPaginasCount;
+    }
     searchBtn?.addEventListener('click', () => {
         let pokemonSearchName = inputPokemonName?.value;
         if (pokemonSearchName || pokemonSearchName == '') {
@@ -89,6 +105,52 @@ function onLoad() {
         });
     });
 }
+var pokemonCount = 0;
+async function previousPage() {
+    if (pokemonCount != 0) {
+        if (paginaActualSpan) {
+            paginaActualCount--;
+            paginaActualSpan.innerHTML = '' + paginaActualCount;
+        }
+        previousPageBtn?.classList.add('block');
+        pokemonCount -= 20;
+        let url = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pokemonCount}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log(result);
+            printPokemon(result);
+            // getPages();
+        }
+        catch (error) {
+        }
+    }
+}
+async function nextPage() {
+    if (pokemonCount <= 1040) {
+        if (paginaActualSpan) {
+            paginaActualCount++;
+            paginaActualSpan.innerHTML = '' + paginaActualCount;
+        }
+        pokemonCount += 20;
+        let url = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pokemonCount}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log(result);
+            printPokemon(result);
+            // getPages();
+        }
+        catch (error) {
+        }
+    }
+}
 function deleteFilterOptions(allTypesBtn) {
     filteringTypes = [];
     allTypesBtn.forEach(typeBtn => {
@@ -137,7 +199,8 @@ async function searchPokemonByType(pokemon_type) {
 }
 async function getAllPokemonPaginated() {
     // para paginar, poner: ?limit=60
-    const url = "https://pokeapi.co/api/v2/pokemon/";
+    //&offset=20 <- els seguents 20
+    const url = "https://pokeapi.co/api/v2/pokemon?limit=20";
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -146,6 +209,7 @@ async function getAllPokemonPaginated() {
         const result = await response.json();
         console.log(result);
         printPokemon(result);
+        // getPages();
     }
     catch (error) {
     }

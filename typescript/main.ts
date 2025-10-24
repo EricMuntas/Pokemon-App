@@ -24,8 +24,16 @@ var groundTypeBtn: HTMLElement | null;
 var poisonTypeBtn: HTMLElement | null;
 var flyingTypeBtn: HTMLElement | null;
 
+var previousPageBtn: HTMLButtonElement | null;
+var nextPageBtn: HTMLButtonElement | null;
+
 var filteringTypes: string[] = [];
 
+var paginaActualSpan: HTMLSpanElement | null;
+var totalPaginasSpan: HTMLSpanElement | null;
+
+var paginaActualCount: number = 1;
+var totalPaginasCount: number = 1040 / 20;
 
 document.addEventListener('DOMContentLoaded', onLoad);
 
@@ -43,6 +51,21 @@ function onLoad(): void {
 
     randomBtn = document.getElementById('random-btn');
 
+    previousPageBtn = document.getElementById('previous') as HTMLButtonElement;
+    nextPageBtn = document.getElementById('next') as HTMLButtonElement;
+
+    previousPageBtn?.addEventListener('click', previousPage);
+    nextPageBtn?.addEventListener('click', nextPage);
+
+    paginaActualSpan = document.getElementById('paginaActual');
+    totalPaginasSpan = document.getElementById('totalPaginas');
+
+    if (paginaActualSpan && totalPaginasSpan) {
+
+        paginaActualSpan.innerHTML = '' + paginaActualCount;
+        totalPaginasSpan.innerHTML = '' + totalPaginasCount;
+
+    }
 
 
     searchBtn?.addEventListener('click', () => {
@@ -120,9 +143,9 @@ function onLoad(): void {
                 filteringTypes.push(getType);
 
                 allTypesBtn.forEach(element => {
-        
-                        element.classList.add('unactive-type');
-                
+
+                    element.classList.add('unactive-type');
+
                 })
 
                 typeBtn.classList.add('active-type');
@@ -138,6 +161,62 @@ function onLoad(): void {
 
 
 }
+
+var pokemonCount: number = 0
+
+async function previousPage(): Promise<void> {
+    if (pokemonCount != 0) {
+
+        if (paginaActualSpan) {
+            paginaActualCount--;
+            paginaActualSpan.innerHTML = '' + paginaActualCount;
+        }
+        previousPageBtn?.classList.add('block');
+        pokemonCount -= 20;
+        let url = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pokemonCount}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log(result);
+            printPokemon(result);
+            // getPages();
+        } catch (error) {
+        }
+    }
+
+}
+
+async function nextPage(): Promise<void> {
+    if (pokemonCount <= 1040) {
+        if (paginaActualSpan) {
+            paginaActualCount++;
+            paginaActualSpan.innerHTML = '' + paginaActualCount;
+        }
+
+        pokemonCount += 20;
+        let url = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pokemonCount}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log(result);
+            printPokemon(result);
+            // getPages();
+        } catch (error) {
+        }
+    }
+
+}
+
 
 function deleteFilterOptions(allTypesBtn: NodeListOf<HTMLElement>): void {
     filteringTypes = [];
@@ -195,7 +274,8 @@ async function searchPokemonByType(pokemon_type: string): Promise<void> {
 
 async function getAllPokemonPaginated(): Promise<void> {
     // para paginar, poner: ?limit=60
-    const url = "https://pokeapi.co/api/v2/pokemon/";
+    //&offset=20 <- els seguents 20
+    const url = "https://pokeapi.co/api/v2/pokemon?limit=20";
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -205,6 +285,7 @@ async function getAllPokemonPaginated(): Promise<void> {
         const result = await response.json();
         console.log(result);
         printPokemon(result);
+        // getPages();
     } catch (error) {
     }
 }
@@ -233,6 +314,8 @@ async function getRandomPokemon(): Promise<void> {
 function capitalizeFirstLetter(val: string): string {
     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
+
+
 
 async function printPokemon(pokemonData: any): Promise<void> {
 
